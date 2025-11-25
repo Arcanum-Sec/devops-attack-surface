@@ -941,7 +941,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                             "Search for credentials in card descriptions and attachments",
                             "Webhook manipulation for data exfiltration",
                             "API abuse for user email to username association"
-                        ]
+                        ],
+                        defaultCreds: "N/A (SaaS - OAuth)"
                     },
                     {
                         name: "Redmine",
@@ -971,6 +972,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Git",
                         description: "Distributed version control. Exposed .git directories are a goldmine.",
+                        defaultPort: "80, 443 (exposed .git)",
                         attackVectors: [
                             "Exposed .git directories (/.git/) - check for 403 vs 404",
                             "git-dumper for recursive .git extraction (10x faster than original)",
@@ -1006,7 +1008,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                             "OAuth app token theft",
                             "Branch protection bypass",
                             "Code search for API keys, passwords"
-                        ]
+                        ],
+                        defaultCreds: "N/A (SaaS - OAuth)"
                     },
                     {
                         name: "GitLab",
@@ -1048,7 +1051,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                             "Webhook manipulation for data exfiltration",
                             "Branch permission bypass",
                             "Public repository access abuse"
-                        ]
+                        ],
+                        defaultCreds: "admin:admin (self-hosted)"
                     },
                     {
                         name: "Subversion (SVN)",
@@ -1067,6 +1071,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "CVS",
                         description: "Legacy version control. Rarely seen but occasionally encountered.",
+                        defaultPort: "2401",
                         attackVectors: [
                             "Exposed CVS repositories",
                             "Unauthenticated access",
@@ -1178,6 +1183,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "AWS Package Manager",
                         description: "AWS CodeArtifact for package management in AWS.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "IAM policy misconfiguration leading to privilege escalation",
                             "IAM user permission to create new policy versions for admin access",
@@ -1194,6 +1200,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Cloudsmith",
                         description: "Cloud-native package management. Multi-format support.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "API key extraction from CI/CD pipelines",
                             "Repository enumeration without authentication",
@@ -1244,6 +1251,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "CircleCI",
                         description: "Cloud-based CI/CD. Environment variables often contain secrets.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "<a href='https://circleci.com/blog/jan-4-2023-incident-report/' target='_blank'>2023 Security Breach</a> - Session token theft via malware (Dec 2022-Jan 2023)",
                             "Environment variables, keys, tokens exfiltrated in breach",
@@ -1261,6 +1269,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "GitHub Actions",
                         description: "GitHub's native CI/CD. Secrets stored in repository or organization level.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "Workflow injection via pull requests",
                             "Secrets extraction from workflow runs",
@@ -1275,6 +1284,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "GitLab CI/CD",
                         description: "GitLab's integrated CI/CD. Variables and runner tokens are prime targets.",
+                        defaultPort: "80, 443",
                         attackVectors: [
                             "CI/CD variable extraction",
                             "Runner registration token abuse",
@@ -1357,6 +1367,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "UrbanCode Deploy (UCD)",
                         description: "IBM's application deployment automation. Enterprise deployment platform.",
+                        defaultPort: "8443, 7918",
                         attackVectors: [
                             "Authentication token theft",
                             "Component process manipulation",
@@ -1370,6 +1381,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Digital.ai",
                         description: "DevOps platform (formerly XebiaLabs). Release orchestration and deployment.",
+                        defaultPort: "443, 5516",
                         attackVectors: [
                             "API credential extraction",
                             "Configuration item (CI) enumeration",
@@ -1382,6 +1394,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "CircleCI Deploy",
                         description: "CircleCI deployment features. Context and environment secrets.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "Context secrets extraction",
                             "Deployment key theft",
@@ -1393,6 +1406,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Codefresh",
                         description: "GitOps and CI/CD platform. Kubernetes-native deployments.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "Pipeline variable extraction",
                             "Shared configuration access",
@@ -1412,6 +1426,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Ansible",
                         description: "Agentless automation. Playbooks and vaults contain sensitive credentials.",
+                        defaultPort: "22 (SSH), 5986 (WinRM)",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-21769' target='_blank'>CVE-2023-21769</a> - Privilege escalation via tower OAuth2 token validation failure",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-0690' target='_blank'>CVE-2024-0690</a> - Information disclosure via ANSIBLE_NO_LOG bypass",
@@ -1486,6 +1501,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "CFEngine",
                         description: "Lightweight config management. Less common but still used.",
+                        defaultPort: "5308",
                         attackVectors: [
                             "Policy file enumeration",
                             "CFEngine Hub API access",
@@ -1497,6 +1513,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "PowerShell DSC",
                         description: "Windows-native configuration management. Credentials often stored in MOF files.",
+                        defaultPort: "5985, 5986 (WinRM)",
                         attackVectors: [
                             "MOF file credential extraction",
                             "Configuration data credential theft",
@@ -1604,6 +1621,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "StackStorm",
                         description: "Event-driven automation. Workflows and actions can contain credentials.",
+                        defaultPort: "443, 9100, 9101",
                         attackVectors: [
                             "API key extraction",
                             "Action credential theft",
@@ -1624,6 +1642,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Terraform",
                         description: "Popular IaC tool. State files are gold mines with credentials and secrets.",
+                        defaultPort: "N/A (CLI tool)",
                         attackVectors: [
                             "Terraform state file extraction (terraform.tfstate)",
                             "State file contains cloud credentials, DB passwords, keys",
@@ -1642,6 +1661,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "AWS CloudFormation",
                         description: "AWS native IaC. Templates and stacks can reveal architecture and secrets.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "Template parameter secrets",
                             "Stack output sensitive data",
@@ -1655,6 +1675,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Azure Resource Manager (ARM)",
                         description: "Azure IaC templates. Can contain secrets and credential references.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "Template parameter secrets",
                             "Deployment history sensitive data",
@@ -1667,6 +1688,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Google Deployment Manager",
                         description: "GCP infrastructure deployment. Templates can expose credentials.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "Template secret extraction",
                             "Service account credential access",
@@ -1711,6 +1733,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Azure Key Vault",
                         description: "Azure's secrets, keys, and certificate management. Cloud-native secrets storage.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "Managed identity with Key Vault access",
                             "Service principal credential theft",
@@ -1725,6 +1748,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "AWS Secrets Manager",
                         description: "AWS secrets rotation and management. Integrated with AWS services.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "IAM role with GetSecretValue permission",
                             "Lambda rotation function compromise",
@@ -1738,6 +1762,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "GCP Secret Manager",
                         description: "Google Cloud secrets storage. Versioned secret management.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "Service account with Secret Manager access",
                             "IAM permission escalation",
@@ -1750,6 +1775,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Thycotic Secret Server",
                         description: "Enterprise privileged access management. On-prem and cloud secrets.",
+                        defaultPort: "443",
                         attackVectors: [
                             "API credential theft",
                             "SQL database backend access",
@@ -1763,6 +1789,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Bitwarden Secrets Manager",
                         description: "Open-source secrets management. Self-hosted or cloud.",
+                        defaultPort: "443, 8080 (self-hosted)",
                         attackVectors: [
                             "Master password compromise",
                             "API access token theft",
@@ -1775,6 +1802,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "CyberArk",
                         description: "Enterprise PAM solution. Privileged account and session management.",
+                        defaultPort: "443, 1858",
                         attackVectors: [
                             "Vault credential theft",
                             "CPM (Central Policy Manager) compromise",
@@ -1788,6 +1816,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Akeyless",
                         description: "SaaS-first secrets management. Cloud-native with zero-knowledge architecture.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "Access token compromise",
                             "API key theft",
@@ -1800,6 +1829,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "GitGuardian",
                         description: "Secrets detection and remediation. Monitors for exposed secrets.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "API token extraction",
                             "Incident data access",
