@@ -1,101 +1,86 @@
-# 🔐 Pentester's Cheatsheet Collection
+# 🎯 DevOps Attack Surface Guide
 
-Interactive, self-hosted HTML reference guides for penetration testing and security assessments.
+An interactive, single-page reference for penetration testers targeting DevOps infrastructure. Built by [Arcanum Security](https://github.com/Arcanum-Sec).
 
-## 📚 Available Cheatsheets
+**🌐 Live Site:** [arcanum-sec.github.io/devops-attack-surface](https://arcanum-sec.github.io/devops-attack-surface/)
 
-### 1. [Default Credentials Cheatsheet](default-credentials.html)
-**52+ services with default usernames and passwords**
-- Databases (PostgreSQL, MySQL, MongoDB, Redis, MSSQL, Oracle, etc.)
-- Web Applications & CMS (WordPress, Jira, Jenkins, GitLab, etc.)
-- Network Devices (Cisco, Juniper, Fortinet, Palo Alto, etc.)
-- Cloud & Virtualization (VMware, Proxmox, Docker, etc.)
-- IoT & Embedded Systems
-- Application Servers
-- Monitoring & Management Tools
+> ⚠️ **Work in Progress:** This guide originated from our internal pentest methodology wiki at Arcanum and has been enhanced with AI assistance. We're actively adding tools, CVEs, and attack vectors. PRs welcome!
 
-**Features:**
-- 🔍 Real-time search
-- 📋 One-click copy to clipboard
-- 🎨 Interactive, modern UI
-- ⚡ Keyboard shortcuts
+## 📊 What's Inside
 
-### 2. [Service Accounts Cheatsheet](service-accounts.html)
-**30+ system and service accounts for Windows, Linux, and Cloud**
+**88+ tools** across **15 categories**, each with:
 
-**Coverage:**
-- **Windows:** SYSTEM, LocalService, NetworkService, IIS AppPools, Virtual Accounts, Domain Service Accounts, gMSA
-- **Linux:** root, www-data, apache, nginx, mysql, postgres, redis, mongodb, docker, systemd accounts
-- **Cloud:** AWS IAM Roles, GCP Service Accounts, Azure Managed Identities, Kubernetes Service Accounts
-- **Containers:** Docker, Kubernetes pod security contexts
+- 🔌 **Default Ports** — For service discovery and scanning
+- 🌐 **Access URLs** — Common URL patterns for SaaS tools (great for recon)
+- 🔑 **Default Credentials** — Where applicable
+- ⚔️ **Attack Vectors** — With CVE links and exploitation techniques
 
-**For Each Account:**
-- Privilege levels and permissions
-- Attack techniques and vectors
-- Exploitation commands (ready to copy)
-- Security notes and risks
-- OPSEC considerations
+### Categories
 
-### 3. [DevOps Attack Surface Guide](devops-attack-surface.html)
-**60+ DevOps tools and platforms with attack vectors**
-
-Based on the open-source class by **Tom and Colbert from Accenture (formerly FusionX)**
-
-**Categories:**
-- 📚 Knowledge Bases (SharePoint, Confluence, Notion, Wiki.js, etc.)
-- 📋 Dev & Project Management (Jira, Trello, Redmine)
-- 🔀 Source Code Management (Git, GitHub, GitLab, Bitbucket, etc.)
-- 📦 Repository Management (Artifactory, Nexus, etc.)
-- 🏗️ Build Servers (Jenkins, CircleCI, GitHub Actions, etc.)
-- 🚀 Deployment Platforms (Octopus Deploy, UrbanCode, etc.)
-- ⚙️ Configuration Management (Ansible, Chef, Puppet, Salt, etc.)
-- 📊 Operations & Monitoring (Splunk, ELK, Grafana, Nagios, etc.)
-- 🏗️ Infrastructure as Code (Terraform, CloudFormation, ARM, etc.)
-- 🔐 Secrets Managers (Vault, Key Vault, Secrets Manager, CyberArk, etc.)
-
-**Includes:**
-- Attack vectors and exploitation techniques
-- Default credentials
-- CVE references
-- OPSEC considerations
-- Complete 2-day course agenda and prerequisites
+| Category | Tools |
+|----------|-------|
+| 📚 Knowledge Bases | SharePoint, Confluence, MediaWiki, Notion, Wiki.js, TikiWiki, DokuWiki |
+| 📋 Dev & Project Management | Jira, Trello, Redmine |
+| 🔀 Source Code Management | Git, GitHub, GitLab, Bitbucket, SVN, Perforce Helix Core |
+| 📦 Repository Management | Artifactory, Nexus, AWS CodeArtifact, Cloudsmith |
+| 🏗️ Build Servers | Jenkins, TeamCity, Bamboo, CircleCI, GitHub Actions, GitLab CI |
+| 🚀 Deployment Platforms | Octopus Deploy, UrbanCode, Codefresh, ArgoCD |
+| ⚙️ Configuration Management | Ansible, Chef, Puppet, Salt, CFEngine, PowerShell DSC |
+| 📊 Operations & Monitoring | Splunk, Elastic (ELK), Grafana, Graylog, Nagios, StackStorm |
+| 🏗️ Infrastructure as Code | Terraform, CloudFormation, ARM Templates, GCP Deployment Manager |
+| 🔐 Secrets Managers | HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, CyberArk, Akeyless |
+| 🗄️ Databases | PostgreSQL, MySQL, MongoDB, Redis, MSSQL, Oracle, Elasticsearch, Cassandra, CouchDB |
+| 🌐 CMS & Web Platforms | WordPress, Drupal, Joomla, Magento, Tomcat, JBoss, WebLogic, phpMyAdmin |
+| 🌐 Network Infrastructure | Cisco, Juniper, Fortinet, Palo Alto, Dell iDRAC, HP iLO, VMware ESXi/vCenter, Proxmox |
+| 📨 Message Queues | RabbitMQ, Apache ActiveMQ, Kafka, ZooKeeper |
 
 ## 🚀 Quick Start
 
-### Option 1: Local Hosting
+### Option 1: Use the Live Site
+Visit **[arcanum-sec.github.io/devops-attack-surface](https://arcanum-sec.github.io/devops-attack-surface/)**
+
+### Option 2: Run Locally
 ```bash
-# Clone the repository
-git clone https://github.com/YOUR_USERNAME/pentest-cheatsheets.git
-cd pentest-cheatsheets
-
-# Start a local web server
+git clone https://github.com/Arcanum-Sec/devops-attack-surface.git
+cd devops-attack-surface
 python3 -m http.server 8080
-
-# Open in browser
-open http://localhost:8080
+# Open http://localhost:8080
 ```
 
-### Option 2: GitHub Pages
-Visit: `https://YOUR_USERNAME.github.io/pentest-cheatsheets/`
+## 🔍 Internal Pentest Workflow
 
-## 📖 Usage
+The guide includes ready-to-run commands for internal penetration testing:
 
-Each cheatsheet is a standalone HTML file that works completely offline. No external dependencies, no JavaScript frameworks - just pure HTML, CSS, and vanilla JavaScript.
+### 1. Enumerate Internal Ranges
+```bash
+for range in "10.0.0.0/8" "172.16.0.0/12" "192.168.0.0/16"; do
+    echo "$range" | mapcidr -silent >> all_targets.txt
+done
+```
 
-**Features:**
-- 🔍 **Search:** Find tools, credentials, or techniques instantly
-- 📋 **Copy:** Click any credential or command to copy to clipboard
-- 🎯 **Interactive:** Expand/collapse categories and tool details
-- ⚡ **Keyboard Shortcuts:**
-  - `Ctrl+F` - Focus search box
-  - `Esc` - Clear search
-- 📱 **Responsive:** Works on desktop and mobile
+### 2. Discover DevOps Services
+```bash
+cat all_targets.txt | httpx -p 80,443,8080,8443,9000,3000,5000,8081,9090,6443,8929,7990,1666,9001,5601,9200,5432,3306,27017,6379,1433,15672,8161,7001,5984,9042 -title -tech-detect -status-code -threads 100 -o live_services.txt
+```
+
+### 3. Scan for Vulnerabilities
+```bash
+nuclei -l live_services.txt -tags devops,cicd,default-login,exposed,panel,jenkins,gitlab,kubernetes,docker,mysql,postgres,mongodb,redis,wordpress,drupal,tomcat,weblogic,activemq,rabbitmq -severity info,low,medium,high,critical -o all_findings.txt
+```
+
+## 📖 Features
+
+- 🔍 **Search** — Find tools, ports, or credentials instantly
+- 📋 **Copy** — Click any value to copy to clipboard
+- 🎯 **Interactive** — Expand/collapse categories and tool details
+- 📱 **Responsive** — Works on desktop and mobile
+- ⚡ **Fast** — Pure HTML/CSS/JS, no frameworks, works offline
 
 ## ⚠️ Disclaimer
 
-These tools are for **authorized security testing only**. Always obtain proper authorization before testing any systems. Unauthorized access is illegal and can cause significant damage.
+This tool is for **authorized security testing only**. Always obtain proper authorization before testing any systems.
 
-**Use cases:**
+**Intended use cases:**
 - Authorized penetration testing
 - Red team operations
 - Security assessments
@@ -104,23 +89,17 @@ These tools are for **authorized security testing only**. Always obtain proper a
 
 ## 🤝 Credits
 
-- **DevOps Attack Surface:** Based on the open-source class by Tom and Colbert from Accenture (formerly FusionX)
-- **Service Accounts:** Compiled from various penetration testing guides and field experience
-- **Default Credentials:** Aggregated from vendor documentation, public databases, and security research
+- **Arcanum Security** — Internal methodology and curation
+- **Original DevOps Class** — Based on work by Tom and Colbert from Accenture (formerly FusionX)
+- **AI Enhancement** — Structure, CVE research, and content expansion
 
 ## 📝 Contributing
 
-Contributions are welcome! If you have:
-- Additional default credentials
-- New service accounts to document
-- More DevOps tools and attack vectors
-- Corrections or improvements
-
-Please open an issue or submit a pull request.
+Found something missing? Have a new CVE or attack vector? PRs and issues welcome!
 
 ## 📄 License
 
-MIT License - Free to use for educational and authorized security testing purposes.
+MIT License — Free to use for educational and authorized security testing purposes.
 
 ## 🔗 Resources
 
@@ -131,4 +110,4 @@ MIT License - Free to use for educational and authorized security testing purpos
 
 ---
 
-**Last Updated:** 2024
+**Maintained by [Arcanum Security](https://github.com/Arcanum-Sec)** | **Last Updated:** November 2025
