@@ -359,22 +359,49 @@
             line-height: 1.5;
         }
 
-        .default-creds {
-            display: none;
-            background: rgba(245, 158, 11, 0.15);
-            padding: 12px 16px;
-            border-radius: 6px;
+        /* Quick Info Box - Port & Creds */
+        .quick-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
             margin-top: 12px;
+            padding: 12px;
+            background: rgba(77, 101, 255, 0.08);
+            border-radius: 6px;
+            border: 1px solid rgba(77, 101, 255, 0.2);
+        }
+
+        .quick-info .info-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             font-size: 13px;
-            border-left: 3px solid var(--warning);
         }
 
-        .tool-card.expanded .default-creds {
-            display: block;
+        .quick-info .info-label {
+            color: var(--text-secondary);
+            font-weight: 500;
         }
 
-        .default-creds strong {
-            color: var(--text);
+        .quick-info .info-value {
+            font-family: 'SF Mono', 'Consolas', monospace;
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .quick-info .info-value.port {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .quick-info .info-value.creds {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .quick-info .info-value:hover {
+            opacity: 0.8;
         }
 
         .warning-note {
@@ -619,9 +646,6 @@
             <a href="default-credentials.html" class="tab-link">
                 <span class="tab-icon">🔑</span> Default Credentials
             </a>
-            <a href="service-accounts.html" class="tab-link">
-                <span class="tab-icon">👤</span> Service Accounts
-            </a>
         </div>
     </nav>
 
@@ -807,6 +831,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "SharePoint",
                         description: "Microsoft's enterprise content management platform. Often contains sensitive documentation, credentials in documents, and architecture diagrams.",
+                        defaultPort: "443, 80",
                         attackVectors: [
                             "Search for exposed credentials in documents",
                             "Enumerate user lists via API",
@@ -822,11 +847,12 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                             "Extract metadata from documents",
                             "Look for .aspx shells if write access obtained"
                         ],
-                        defaultCreds: "Check for default admin accounts or service accounts"
+                        defaultCreds: "Domain\\Administrator or setup-defined admin"
                     },
                     {
                         name: "Confluence",
                         description: "Atlassian's wiki and collaboration platform. Treasure trove of architecture docs, passwords, and API keys.",
+                        defaultPort: "8090, 8091, 443",
                         attackVectors: [
                             "Search for 'password', 'api key', 'secret', 'token' in content",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-22527' target='_blank'>CVE-2023-22527</a> (CVSS 10.0) - OGNL injection pre-auth RCE (CRITICAL)",
@@ -841,11 +867,12 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                             "Exported space archives containing sensitive data",
                             "Webwork OGNL injection for RCE"
                         ],
-                        defaultCreds: "admin:admin (old versions)"
+                        defaultCreds: "admin:admin (initial setup)"
                     },
                     {
                         name: "MediaWiki",
                         description: "Open-source wiki software. Can expose sensitive internal documentation.",
+                        defaultPort: "80, 443",
                         attackVectors: [
                             "Check Special:Version for software versions",
                             "Enumerate users via API (api.php?action=query&list=allusers)",
@@ -858,11 +885,12 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                             "API abuse for content enumeration",
                             "Extension vulnerabilities (check installed extensions)"
                         ],
-                        defaultCreds: "Check for weak admin passwords"
+                        defaultCreds: "WikiSysop:(setup-defined)"
                     },
                     {
                         name: "DokuWiki",
                         description: "Simple wiki system. Often misconfigured with public access.",
+                        defaultPort: "80, 443",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-42758' target='_blank'>CVE-2024-42758</a> - XSS vulnerability in indexmenu plugin",
                             "Stored XSS via SVG file uploads",
@@ -874,22 +902,25 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                             "Plugin vulnerabilities (100+ plugins available)",
                             "Remote file inclusion in templates"
                         ],
-                        defaultCreds: "Initial setup may have weak passwords"
+                        defaultCreds: "admin:(setup-defined)"
                     },
                     {
                         name: "Notion",
                         description: "Modern workspace and documentation tool. Cloud-based, often shared publicly.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "Enumerate publicly shared pages",
                             "Google dorking for exposed Notion pages",
                             "API token extraction from integrations",
                             "Check for overshared workspaces",
                             "Leaked workspace URLs in GitHub"
-                        ]
+                        ],
+                        defaultCreds: "N/A (OAuth/SSO)"
                     },
                     {
                         name: "TikiWiki",
                         description: "Full-featured wiki and CMS. Complex with many features and attack surfaces.",
+                        defaultPort: "80, 443",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2020-15906' target='_blank'>CVE-2020-15906</a> (CVSS 9.3) - Authentication bypass vulnerability",
                             "File upload vulnerabilities leading to RCE",
@@ -900,11 +931,13 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                             "CSRF leading to code execution",
                             "PHP code injection via template system",
                             "Shell upload via file gallery with .php/.phtml extensions"
-                        ]
+                        ],
+                        defaultCreds: "admin:admin"
                     },
                     {
                         name: "Wiki.js",
                         description: "Modern, lightweight wiki built on Node.js. Growing in popularity.",
+                        defaultPort: "3000, 80, 443",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-34710' target='_blank'>CVE-2024-34710</a> - Client-side template injection vulnerability",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2022-23654' target='_blank'>CVE-2022-23654</a> - Path prediction leading to RCE",
@@ -917,7 +950,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                             "Server-side template injection in Markdown renderer",
                             "Authorization bypass via GraphQL mutations"
                         ],
-                        defaultCreds: "admin@example.com:admin (initial setup)"
+                        defaultCreds: "admin@example.com:admin123456"
                     }
                 ]
             },
@@ -929,6 +962,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Jira",
                         description: "Atlassian's issue tracking and project management. Gold mine for credentials, API keys, and internal info.",
+                        defaultPort: "8080, 443",
                         attackVectors: [
                             "Search for 'password', 'credentials', 'token', 'api key' in tickets",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-22501' target='_blank'>CVE-2023-22501</a> (CVSS 9.4) - Authentication bypass in Jira Service Management",
@@ -945,11 +979,12 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                             "JQL injection for data extraction",
                             "SSRF in OAuth plugin and Mobile Plugin"
                         ],
-                        defaultCreds: "admin:admin (fresh installs)"
+                        defaultCreds: "admin:admin"
                     },
                     {
                         name: "Trello",
                         description: "Kanban-style project management. Often has public boards with sensitive info.",
+                        defaultPort: "443 (SaaS)",
                         attackVectors: [
                             "2024 API breach - Unsecured REST API exposed 15M users",
                             "Unauthenticated API enumeration - board discovery via email",
@@ -967,6 +1002,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Redmine",
                         description: "Open-source project management. Can contain sensitive project data.",
+                        defaultPort: "80, 443, 3000",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-47259' target='_blank'>CVE-2023-47259</a>, <a href='https://nvd.nist.gov/vuln/detail/CVE-2023-47260' target='_blank'>CVE-2023-47260</a>, <a href='https://nvd.nist.gov/vuln/detail/CVE-2023-47258' target='_blank'>CVE-2023-47258</a> - XSS vulnerabilities",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2022-44637' target='_blank'>CVE-2022-44637</a> - Persistent XSS in Textile formatter",
@@ -1009,6 +1045,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "GitHub",
                         description: "Cloud-based Git hosting. API access, actions, and secrets management.",
+                        defaultPort: "443 (SaaS), 22 (SSH)",
                         attackVectors: [
                             "GitHub dorking for exposed credentials",
                             "Enumerate repositories via API",
@@ -1030,6 +1067,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "GitLab",
                         description: "Self-hosted Git platform with CI/CD. Often contains sensitive CI variables.",
+                        defaultPort: "80, 443, 22 (SSH)",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2025-25291' target='_blank'>CVE-2025-25291</a> & <a href='https://nvd.nist.gov/vuln/detail/CVE-2025-25292' target='_blank'>CVE-2025-25292</a> (CRITICAL) - SAML authentication bypass",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2025-27407' target='_blank'>CVE-2025-27407</a> (CVSS 9.0) - RCE via Ruby graphql library",
@@ -1052,6 +1090,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Bitbucket",
                         description: "Atlassian's Git solution. Integrated with Jira and other Atlassian products.",
+                        defaultPort: "7990, 7999 (SSH), 443",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2022-36804' target='_blank'>CVE-2022-36804</a> (CVSS 9.8) - Command injection via git --exec argument",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2022-43401' target='_blank'>CVE-2022-43401</a> (CRITICAL) - Command injection via username manipulation",
@@ -1070,6 +1109,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Subversion (SVN)",
                         description: "Centralized version control. Less common but still used in legacy systems.",
+                        defaultPort: "3690, 80, 443",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-45720' target='_blank'>CVE-2024-45720</a> (CVSS 8.2) - Windows command injection via character encoding",
                             "Exposed .svn directories",
@@ -1093,6 +1133,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Azure DevOps Server",
                         description: "Microsoft's DevOps platform. Includes repos, pipelines, artifacts.",
+                        defaultPort: "443, 8080",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2025-29813' target='_blank'>CVE-2025-29813</a> (CVSS 10.0) - Privilege escalation over network (CRITICAL)",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-20667' target='_blank'>CVE-2024-20667</a> - RCE with Queue Build permissions in pipelines",
@@ -1112,6 +1153,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Perforce Helix Core",
                         description: "Enterprise version control for large-scale development. Default port 1666. Common in gaming and large enterprises.",
+                        defaultPort: "1666",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-45849' target='_blank'>CVE-2023-45849</a> (CVSS 10.0) - Unauthenticated RCE as LocalSystem/root (CRITICAL)",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-5759' target='_blank'>CVE-2023-5759</a> (CVSS 7.5) - DoS via malformed RPC packets",
@@ -1146,6 +1188,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Artifactory",
                         description: "JFrog's universal artifact repository. Stores builds, dependencies, Docker images.",
+                        defaultPort: "8081, 8082, 443",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2022-0668' target='_blank'>CVE-2022-0668</a> (CVSS 9.8) - Authentication bypass leading to privilege escalation",
                             "Insecure deserialization RCE (versions < 7.36.1/6.23.41)",
@@ -1167,6 +1210,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Nexus",
                         description: "Sonatype's repository manager. Manages Maven, npm, Docker, and more.",
+                        defaultPort: "8081, 443",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-5082' target='_blank'>CVE-2024-5082</a> - RCE via malicious Maven artifact (Nexus 2.x up to 2.15.1)",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-5083' target='_blank'>CVE-2024-5083</a> - Stored XSS via Maven artifact payloads",
@@ -1232,6 +1276,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Jenkins",
                         description: "Most popular CI/CD server. Highly extensible, often misconfigured. High-value target.",
+                        defaultPort: "8080, 443, 50000 (agents)",
                         attackVectors: [
                             "Unauthenticated access (no security configured)",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-23897' target='_blank'>CVE-2024-23897</a> (CVSS 9.8) - <a href='https://www.jenkins.io/security/advisory/2024-01-24/' target='_blank'>Arbitrary file leak to RCE</a>",
@@ -1300,6 +1345,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "TeamCity",
                         description: "JetBrains CI/CD server. Often used in enterprise environments.",
+                        defaultPort: "8111, 443",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-27198' target='_blank'>CVE-2024-27198</a> (CVSS 9.8) - <a href='https://www.rapid7.com/blog/post/2024/03/04/etr-cve-2024-27198-and-cve-2024-27199-jetbrains-teamcity-multiple-authentication-bypass-vulnerabilities-fixed/' target='_blank'>Auth bypass to RCE</a> (CISA KEV)",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-27199' target='_blank'>CVE-2024-27199</a> (CVSS 7.3) - Path traversal auth bypass",
@@ -1319,6 +1365,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Bamboo",
                         description: "Atlassian's CI/CD server. Integrates with Jira and Bitbucket.",
+                        defaultPort: "8085, 443",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-1597' target='_blank'>CVE-2024-1597</a> (CVSS 10.0) - <a href='https://www.securityweek.com/atlassian-patches-critical-vulnerability-in-bamboo-data-center-and-server/' target='_blank'>SQL injection in PostgreSQL dependency</a>",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-22506' target='_blank'>CVE-2023-22506</a> (CVSS 7.5) - Injection and RCE (versions < 9.2.3, 9.3.1)",
@@ -1343,6 +1390,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Octopus Deploy",
                         description: "Automated deployment and release management. Contains production credentials.",
+                        defaultPort: "80, 443, 10943 (tentacle)",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2025-0589' target='_blank'>CVE-2025-0589</a> (CVSS 4.9) - <a href='https://www.intruder.io/research/octopus-deploy-cve-2025-0589' target='_blank'>Unauthenticated AD data exposure</a>",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2025-0539' target='_blank'>CVE-2025-0539</a> (CVSS 5.9) - SSRF with credential theft (Windows)",
@@ -1439,6 +1487,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Chef",
                         description: "Configuration management using Ruby. Cookbooks may contain secrets.",
+                        defaultPort: "443 (Chef Server)",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-42658' target='_blank'>CVE-2023-42658</a> - <a href='https://www.chef.io/blog/important-security-update-for-chef-customers' target='_blank'>Chef InSpec policy file code execution</a>",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-40050' target='_blank'>CVE-2023-40050</a> - Chef Automate malicious profile RCE",
@@ -1455,6 +1504,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Puppet",
                         description: "Infrastructure automation platform. Masters control configuration of nodes.",
+                        defaultPort: "8140, 443",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-2530' target='_blank'>CVE-2023-2530</a> - Privilege escalation allowing RCE in orchestration service",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-5309' target='_blank'>CVE-2023-5309</a> - Broken SAML session management",
@@ -1472,6 +1522,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Salt",
                         description: "Event-driven automation. Master-minion architecture.",
+                        defaultPort: "4505, 4506",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2025-22237' target='_blank'>CVE-2025-22237</a> (CVSS 6.7) - RCE via minion key access",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2025-22236' target='_blank'>CVE-2025-22236</a> - Minion event bus authorization bypass",
@@ -1521,6 +1572,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Splunk",
                         description: "Enterprise logging and SIEM. Logs may contain credentials and sensitive data.",
+                        defaultPort: "8000, 8089, 9997",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2025-20229' target='_blank'>CVE-2025-20229</a> (CVSS 8.0) - <a href='https://advisory.splunk.com/advisories/SVD-2025-0301' target='_blank'>RCE via file upload</a> (versions < 9.3.3/9.2.5/9.1.8)",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-1205' target='_blank'>CVE-2024-1205</a> (CVSS 8.8) - <a href='https://advisory.splunk.com/advisories/SVD-2024-1205' target='_blank'>RCE via jsonpickle deserialization</a>",
@@ -1539,6 +1591,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Elastic (ELK)",
                         description: "Elasticsearch, Logstash, Kibana. Logs and metrics, often sensitive data.",
+                        defaultPort: "9200, 5601, 5044",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-37287' target='_blank'>CVE-2024-37287</a> - <a href='https://censys.com/cve-2024-37287/' target='_blank'>Kibana prototype tainting RCE</a> (ML/Alerting connectors)",
                             "ESA-2024-17 - Type confusion RCE via Chromium in Kibana reporting",
@@ -1558,6 +1611,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Grafana",
                         description: "Metrics visualization. Data source credentials and API keys.",
+                        defaultPort: "3000, 443",
                         attackVectors: [
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2025-4123' target='_blank'>CVE-2025-4123</a> (CVSS 7.6) - <a href='https://medium.com/@Nightbloodz/grafana-cve-2025-4123-full-read-ssrf-account-takeover-d12abd13cd53' target='_blank'>XSS leading to full read SSRF</a> (with Image Renderer plugin)",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2025-6023' target='_blank'>CVE-2025-6023</a> (CVSS HIGH) - <a href='https://www.opswat.com/blog/grafana-cve-2025-6023-unit-515-discovers-incomplete-fix-that-leads-to-full-account-takeover' target='_blank'>XSS leading to account takeover</a>",
@@ -1576,6 +1630,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Graylog",
                         description: "Log management platform. Centralized logging with potential sensitive data.",
+                        defaultPort: "9000, 12201",
                         attackVectors: [
                             "Default credentials (admin:admin)",
                             "API token extraction",
@@ -1590,6 +1645,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Nagios",
                         description: "Infrastructure monitoring. Configuration files may have credentials.",
+                        defaultPort: "80, 443, 5666",
                         attackVectors: [
                             "Default credentials (nagiosadmin:nagios)",
                             "Configuration file credential extraction",
@@ -1685,6 +1741,7 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "HashiCorp Vault",
                         description: "Leading secrets management platform. Secures, stores, and controls access to tokens, passwords, certificates.",
+                        defaultPort: "8200, 8201",
                         attackVectors: [
                             "<a href='https://thehackernews.com/2025/08/cyberark-and-hashicorp-flaws-enable.html' target='_blank'>Vault Fault</a> - 14 CVEs enabling <a href='https://cyata.ai/blog/cracking-the-vault-how-we-found-zero-day-flaws-in-authentication-identity-and-authorization-in-hashicorp-vault/' target='_blank'>remote vault takeover</a>",
                             "<a href='https://nvd.nist.gov/vuln/detail/CVE-2025-6000' target='_blank'>CVE-2025-6000</a> (CVSS 9.1) - Audit logging RCE via plugin directory",
@@ -1823,18 +1880,21 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                 categoryDiv.dataset.category = cat.category;
 
                 const toolsHTML = cat.tools.map(tool => {
-                    const attackVectorsHTML = tool.attackVectors ? `
-                        <div class="attack-vectors">
-                            <h4> Attack Vectors</h4>
-                            <ul>
-                                ${tool.attackVectors.map(v => `<li>${v}</li>`).join('')}
-                            </ul>
+                    // Quick info box with port and creds
+                    const hasQuickInfo = tool.defaultPort || tool.defaultCreds;
+                    const quickInfoHTML = hasQuickInfo ? `
+                        <div class="quick-info">
+                            ${tool.defaultPort ? `<div class="info-item"><span class="info-label">🔌 Port:</span> <span class="info-value port">${tool.defaultPort}</span></div>` : ''}
+                            ${tool.defaultCreds ? `<div class="info-item"><span class="info-label">🔑 Creds:</span> <span class="info-value creds">${tool.defaultCreds}</span></div>` : ''}
                         </div>
                     ` : '';
 
-                    const defaultCredsHTML = tool.defaultCreds ? `
-                        <div class="default-creds">
-                            <strong> Default Credentials:</strong> ${tool.defaultCreds}
+                    const attackVectorsHTML = tool.attackVectors ? `
+                        <div class="attack-vectors">
+                            <h4>⚔️ Attack Vectors</h4>
+                            <ul>
+                                ${tool.attackVectors.map(v => `<li>${v}</li>`).join('')}
+                            </ul>
                         </div>
                     ` : '';
 
@@ -1842,8 +1902,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                         <div class="tool-card" data-tool="${tool.name.toLowerCase()}" onclick="toggleTool(this)">
                             <div class="tool-name">${tool.name}</div>
                             <div class="tool-description">${tool.description || ''}</div>
+                            ${quickInfoHTML}
                             ${attackVectorsHTML}
-                            ${defaultCredsHTML}
                         </div>
                     `;
                 }).join('');
