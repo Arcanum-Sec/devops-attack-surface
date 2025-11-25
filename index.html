@@ -400,6 +400,13 @@
             color: var(--warning);
         }
 
+        .quick-info .info-value.url {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--secondary);
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 12px;
+        }
+
         .quick-info .info-value:hover {
             opacity: 0.8;
         }
@@ -851,7 +858,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Notion",
                         description: "Modern workspace and documentation tool. Cloud-based, often shared publicly.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "notion.so/{workspace}, {workspace}.notion.site",
                         attackVectors: [
                             "Enumerate publicly shared pages",
                             "Google dorking for exposed Notion pages",
@@ -928,7 +936,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Trello",
                         description: "Kanban-style project management. Often has public boards with sensitive info.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "trello.com/b/{boardId}, trello.com/{username}",
                         attackVectors: [
                             "2024 API breach - Unsecured REST API exposed 15M users",
                             "Unauthenticated API enumeration - board discovery via email",
@@ -991,7 +1000,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "GitHub",
                         description: "Cloud-based Git hosting. API access, actions, and secrets management.",
-                        defaultPort: "443 (SaaS), 22 (SSH)",
+                        defaultPort: "SaaS, 22 (SSH)",
+                        accessUrl: "github.com/{org}/{repo}, api.github.com, raw.githubusercontent.com",
                         attackVectors: [
                             "GitHub dorking for exposed credentials",
                             "Enumerate repositories via API",
@@ -1183,7 +1193,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "AWS Package Manager",
                         description: "AWS CodeArtifact for package management in AWS.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "console.aws.amazon.com/codesuite/codeartifact, {domain}-{accountId}.d.codeartifact.{region}.amazonaws.com",
                         attackVectors: [
                             "IAM policy misconfiguration leading to privilege escalation",
                             "IAM user permission to create new policy versions for admin access",
@@ -1200,7 +1211,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Cloudsmith",
                         description: "Cloud-native package management. Multi-format support.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "cloudsmith.io/{org}/{repo}, dl.cloudsmith.io/{org}/{repo}",
                         attackVectors: [
                             "API key extraction from CI/CD pipelines",
                             "Repository enumeration without authentication",
@@ -1251,7 +1263,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "CircleCI",
                         description: "Cloud-based CI/CD. Environment variables often contain secrets.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "app.circleci.com/pipelines/{vcs}/{org}/{repo}, circleci.com/gh/{org}/{repo}",
                         attackVectors: [
                             "<a href='https://circleci.com/blog/jan-4-2023-incident-report/' target='_blank'>2023 Security Breach</a> - Session token theft via malware (Dec 2022-Jan 2023)",
                             "Environment variables, keys, tokens exfiltrated in breach",
@@ -1269,7 +1282,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "GitHub Actions",
                         description: "GitHub's native CI/CD. Secrets stored in repository or organization level.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "github.com/{org}/{repo}/actions, api.github.com/repos/{org}/{repo}/actions",
                         attackVectors: [
                             "Workflow injection via pull requests",
                             "Secrets extraction from workflow runs",
@@ -1394,7 +1408,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "CircleCI Deploy",
                         description: "CircleCI deployment features. Context and environment secrets.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "app.circleci.com/settings/organization/{vcs}/{org}/contexts",
                         attackVectors: [
                             "Context secrets extraction",
                             "Deployment key theft",
@@ -1406,7 +1421,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Codefresh",
                         description: "GitOps and CI/CD platform. Kubernetes-native deployments.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "g.codefresh.io/pipelines, {account}.codefresh.io",
                         attackVectors: [
                             "Pipeline variable extraction",
                             "Shared configuration access",
@@ -1642,7 +1658,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Terraform",
                         description: "Popular IaC tool. State files are gold mines with credentials and secrets.",
-                        defaultPort: "N/A (CLI tool)",
+                        defaultPort: "CLI + SaaS",
+                        accessUrl: "app.terraform.io/{org}, *.tfstate files, S3/GCS/Azure backends",
                         attackVectors: [
                             "Terraform state file extraction (terraform.tfstate)",
                             "State file contains cloud credentials, DB passwords, keys",
@@ -1661,7 +1678,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "AWS CloudFormation",
                         description: "AWS native IaC. Templates and stacks can reveal architecture and secrets.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "console.aws.amazon.com/cloudformation, cloudformation.{region}.amazonaws.com",
                         attackVectors: [
                             "Template parameter secrets",
                             "Stack output sensitive data",
@@ -1675,7 +1693,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Azure Resource Manager (ARM)",
                         description: "Azure IaC templates. Can contain secrets and credential references.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "portal.azure.com, management.azure.com/subscriptions/{subId}/resourceGroups",
                         attackVectors: [
                             "Template parameter secrets",
                             "Deployment history sensitive data",
@@ -1688,7 +1707,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Google Deployment Manager",
                         description: "GCP infrastructure deployment. Templates can expose credentials.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "console.cloud.google.com/dm/deployments, deploymentmanager.googleapis.com",
                         attackVectors: [
                             "Template secret extraction",
                             "Service account credential access",
@@ -1733,7 +1753,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Azure Key Vault",
                         description: "Azure's secrets, keys, and certificate management. Cloud-native secrets storage.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "portal.azure.com/#blade/HubsExtension/BrowseResource/resourceType/Microsoft.KeyVault, {vault-name}.vault.azure.net",
                         attackVectors: [
                             "Managed identity with Key Vault access",
                             "Service principal credential theft",
@@ -1748,7 +1769,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "AWS Secrets Manager",
                         description: "AWS secrets rotation and management. Integrated with AWS services.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "console.aws.amazon.com/secretsmanager, secretsmanager.{region}.amazonaws.com",
                         attackVectors: [
                             "IAM role with GetSecretValue permission",
                             "Lambda rotation function compromise",
@@ -1762,7 +1784,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "GCP Secret Manager",
                         description: "Google Cloud secrets storage. Versioned secret management.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "console.cloud.google.com/security/secret-manager, secretmanager.googleapis.com",
                         attackVectors: [
                             "Service account with Secret Manager access",
                             "IAM permission escalation",
@@ -1816,7 +1839,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "Akeyless",
                         description: "SaaS-first secrets management. Cloud-native with zero-knowledge architecture.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "console.akeyless.io, {gateway}.akeyless.io, api.akeyless.io",
                         attackVectors: [
                             "Access token compromise",
                             "API key theft",
@@ -1829,7 +1853,8 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                     {
                         name: "GitGuardian",
                         description: "Secrets detection and remediation. Monitors for exposed secrets.",
-                        defaultPort: "443 (SaaS)",
+                        defaultPort: "SaaS",
+                        accessUrl: "dashboard.gitguardian.com, api.gitguardian.com",
                         attackVectors: [
                             "API token extraction",
                             "Incident data access",
@@ -2299,11 +2324,12 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                 categoryDiv.dataset.category = cat.category;
 
                 const toolsHTML = cat.tools.map(tool => {
-                    // Quick info box with port and creds
-                    const hasQuickInfo = tool.defaultPort || tool.defaultCreds;
+                    // Quick info box with port, access URL, and creds
+                    const hasQuickInfo = tool.defaultPort || tool.defaultCreds || tool.accessUrl;
                     const quickInfoHTML = hasQuickInfo ? `
                         <div class="quick-info">
                             ${tool.defaultPort ? `<div class="info-item"><span class="info-label">🔌 Port:</span> <span class="info-value port">${tool.defaultPort}</span></div>` : ''}
+                            ${tool.accessUrl ? `<div class="info-item"><span class="info-label">🌐 Access:</span> <span class="info-value url">${tool.accessUrl}</span></div>` : ''}
                             ${tool.defaultCreds ? `<div class="info-item"><span class="info-label">🔑 Creds:</span> <span class="info-value creds">${tool.defaultCreds}</span></div>` : ''}
                         </div>
                     ` : '';
