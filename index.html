@@ -699,54 +699,98 @@
         </div>
 
         <div class="scan-syntax-section">
-            <h3>🔍 Quick Scan Commands</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 16px;">Use these commands to quickly enumerate DevOps attack surface on your targets.</p>
+            <h3>🔍 Internal Pentest - Quick Scan Commands</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 16px;">Use these commands to enumerate DevOps attack surface on internal network ranges.</p>
 
             <div class="scan-command-group">
-                <h4>HTTPX - Service Discovery</h4>
-                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 8px;">Probe for common DevOps services by port and path:</p>
+                <h4>Step 1: Generate Target List from IP Ranges</h4>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 8px;">Create target lists from internal CIDR ranges:</p>
                 <div class="code-block" onclick="copyCode(this)">
-# Discover DevOps services on common ports
-cat targets.txt | httpx -p 80,443,8080,8443,9000,8000,8888,3000,5000,8081,8082,9090,9443,6443 -title -tech-detect -status-code
+# Generate IPs from CIDR ranges (using prips, nmap, or mapcidr)
+prips 10.0.0.0/24 > targets.txt
+prips 192.168.1.0/24 >> targets.txt
+prips 172.16.0.0/16 >> targets.txt
 
-# Check for specific DevOps paths
-cat targets.txt | httpx -path "/jenkins/,/gitlab/,/artifactory/,/nexus/,/sonarqube/,/grafana/,/prometheus/,/kibana/,/argocd/,/.git/config" -mc 200,301,302,401,403
+# Or use mapcidr for large ranges
+echo "10.0.0.0/8" | mapcidr -silent > targets.txt
+echo "192.168.0.0/16" | mapcidr -silent >> targets.txt
+echo "172.16.0.0/12" | mapcidr -silent >> targets.txt
 
-# Full DevOps path enumeration
-echo "target.com" | httpx -path "/api/v4/projects,/api/v1/namespaces,/v2/_catalog,/job/,/blue/organizations/,/userContent/,/.well-known/," -mc 200,401,403</div>
+# Or use nmap to generate list
+nmap -sL -n 10.0.0.0/24 | awk '/Nmap scan report/{print $NF}' > targets.txt</div>
             </div>
 
             <div class="scan-command-group">
-                <h4>Nuclei - Vulnerability Scanning</h4>
-                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 8px;">Scan for DevOps-specific vulnerabilities and misconfigurations:</p>
+                <h4>Step 2: HTTPX - DevOps Service Discovery</h4>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 8px;">Probe internal IPs for DevOps services on common ports:</p>
                 <div class="code-block" onclick="copyCode(this)">
-# Scan with DevOps-focused templates
-nuclei -l targets.txt -tags devops,cicd,jenkins,gitlab,kubernetes,docker,aws,azure,gcp -severity medium,high,critical
+# Discover DevOps services on common ports (from IP list)
+cat targets.txt | httpx -p 80,443,8080,8443,9000,8000,8888,3000,5000,8081,8082,9090,9443,6443,1666,7990,8929,9001 -title -tech-detect -status-code -o live_devops.txt
 
-# Target specific technologies
-nuclei -l targets.txt -tags jenkins -severity low,medium,high,critical
-nuclei -l targets.txt -tags gitlab -severity low,medium,high,critical
-nuclei -l targets.txt -tags kubernetes -severity low,medium,high,critical
+# Scan specific CIDR directly
+echo "10.0.0.0/24" | mapcidr -silent | httpx -p 80,443,8080,8443,9000,3000,8081,9090,6443 -title -tech-detect -o live_hosts.txt
 
-# Default credentials checks
-nuclei -l targets.txt -tags default-login -severity low,medium,high,critical
+# Check for DevOps paths on discovered hosts
+cat live_hosts.txt | httpx -path "/jenkins/,/gitlab/,/artifactory/,/nexus/,/sonarqube/,/grafana/,/prometheus/,/kibana/,/argocd/,/.git/config,/api/v4/projects,/v2/_catalog" -mc 200,301,302,401,403 -o devops_paths.txt
+
+# Kubernetes API discovery
+cat targets.txt | httpx -p 6443,8443,10250,10255 -path "/api,/api/v1,/apis,/healthz,/version" -mc 200,401,403 -o k8s_endpoints.txt
+
+# Perforce server discovery (port 1666)
+cat targets.txt | httpx -p 1666 -title -status-code -o perforce_servers.txt</div>
+            </div>
+
+            <div class="scan-command-group">
+                <h4>Step 3: Nuclei - Vulnerability Scanning</h4>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 8px;">Scan discovered hosts for DevOps vulnerabilities:</p>
+                <div class="code-block" onclick="copyCode(this)">
+# Full DevOps vulnerability scan
+nuclei -l live_devops.txt -tags devops,cicd,jenkins,gitlab,kubernetes,docker,grafana,prometheus -severity medium,high,critical -o vulns_devops.txt
+
+# Default credentials (critical for internal pentest)
+nuclei -l live_devops.txt -tags default-login -severity info,low,medium,high,critical -o default_creds.txt
+
+# Jenkins-specific scans
+nuclei -l live_devops.txt -tags jenkins -severity info,low,medium,high,critical -o jenkins_vulns.txt
+
+# GitLab-specific scans
+nuclei -l live_devops.txt -tags gitlab -severity info,low,medium,high,critical -o gitlab_vulns.txt
+
+# Kubernetes & container scans
+nuclei -l live_devops.txt -tags kubernetes,k8s,docker,container -severity medium,high,critical -o k8s_vulns.txt
 
 # Exposed panels and dashboards
-nuclei -l targets.txt -tags panel,dashboard,exposed -severity info,low,medium,high</div>
+nuclei -l live_devops.txt -tags panel,dashboard,exposed,config -severity info,low,medium,high -o exposed_panels.txt
+
+# CVE-specific scans for critical vulns
+nuclei -l live_devops.txt -tags cve -severity critical,high -o critical_cves.txt</div>
             </div>
 
             <div class="scan-command-group">
-                <h4>Combined Recon Pipeline</h4>
-                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 8px;">Full enumeration workflow:</p>
+                <h4>Step 4: Combined Internal Recon Pipeline</h4>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 8px;">Full internal network DevOps enumeration workflow:</p>
                 <div class="code-block" onclick="copyCode(this)">
-# Complete DevOps attack surface enumeration
-subfinder -d target.com -silent | dnsx -silent | httpx -p 80,443,8080,8443,9000,3000,5000,8081,9090,6443 -title -tech-detect -o live_hosts.txt
+# === COMPLETE INTERNAL DEVOPS ATTACK SURFACE ENUMERATION ===
 
-# Scan discovered hosts for vulnerabilities
-nuclei -l live_hosts.txt -tags devops,cicd,exposed,default-login,misconfig -severity medium,high,critical -o vulns.txt
+# 1. Generate targets from multiple internal ranges
+for range in "10.0.0.0/24" "192.168.1.0/24" "172.16.0.0/24"; do
+    echo "$range" | mapcidr -silent >> all_targets.txt
+done
 
-# Check for exposed .git directories
-cat live_hosts.txt | httpx -path "/.git/config,/.git/HEAD" -mc 200 -o exposed_git.txt</div>
+# 2. Fast port scan for DevOps services
+cat all_targets.txt | httpx -p 80,443,8080,8443,9000,3000,5000,8081,9090,6443,8929,7990,1666,9001,3000,5601,9200 -title -tech-detect -status-code -threads 100 -o live_services.txt
+
+# 3. Extract just URLs for nuclei
+cat live_services.txt | cut -d' ' -f1 > live_urls.txt
+
+# 4. Run comprehensive nuclei scan
+nuclei -l live_urls.txt -tags devops,cicd,default-login,exposed,panel,jenkins,gitlab,kubernetes,docker -severity info,low,medium,high,critical -o all_findings.txt
+
+# 5. Check for exposed .git directories
+cat live_urls.txt | httpx -path "/.git/config,/.git/HEAD,/.svn/entries" -mc 200 -o exposed_repos.txt
+
+# 6. Screenshot all discovered services
+cat live_urls.txt | gowitness file -f - -P screenshots/</div>
             </div>
         </div>
     </div>
