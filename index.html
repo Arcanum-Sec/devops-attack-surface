@@ -497,9 +497,69 @@
                 width: 100%;
             }
         }
+
+        /* Tab Navigation */
+        .tab-nav {
+            background: #0a0714;
+            border-bottom: 1px solid var(--border);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 101;
+        }
+
+        .tab-nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            gap: 0;
+        }
+
+        .tab-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 24px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-link:hover {
+            color: var(--text);
+            background: rgba(77, 101, 255, 0.1);
+        }
+
+        .tab-link.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: rgba(77, 101, 255, 0.05);
+        }
+
+        .tab-icon {
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
+    <nav class="tab-nav">
+        <div class="tab-nav-inner">
+            <a href="index.html" class="tab-link active">
+                <span class="tab-icon">🎯</span> Attack Surface
+            </a>
+            <a href="default-credentials.html" class="tab-link">
+                <span class="tab-icon">🔑</span> Default Credentials
+            </a>
+            <a href="service-accounts.html" class="tab-link">
+                <span class="tab-icon">👤</span> Service Accounts
+            </a>
+        </div>
+    </nav>
+
     <div class="header">
         <div class="header-content">
             <h1> DevOps Pipeline Attack Surface</h1>
