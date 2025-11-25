@@ -369,6 +369,9 @@
             background: rgba(77, 101, 255, 0.08);
             border-radius: 6px;
             border: 1px solid rgba(77, 101, 255, 0.2);
+            overflow: hidden;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .quick-info .info-item {
@@ -378,6 +381,7 @@
             font-size: 13px;
             max-width: 100%;
             min-width: 0;
+            flex-shrink: 1;
         }
 
         .quick-info .info-label {
@@ -387,9 +391,15 @@
 
         .quick-info .info-value {
             font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 12px;
             padding: 2px 8px;
             border-radius: 4px;
             cursor: pointer;
+            word-break: break-all;
+            overflow-wrap: anywhere;
+            white-space: normal;
+            line-height: 1.4;
+            max-width: 100%;
         }
 
         .quick-info .info-value.port {
@@ -405,12 +415,7 @@
         .quick-info .info-value.url {
             background: rgba(139, 92, 246, 0.2);
             color: var(--secondary);
-            font-family: 'SF Mono', 'Consolas', monospace;
             font-size: 11px;
-            word-break: break-all;
-            overflow-wrap: anywhere;
-            white-space: normal;
-            line-height: 1.4;
         }
 
         .quick-info .info-value:hover {
