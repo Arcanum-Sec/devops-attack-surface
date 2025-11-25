@@ -442,6 +442,71 @@
             text-decoration: underline;
         }
 
+        .scan-syntax-section {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 8px;
+            margin-top: 32px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+        }
+
+        .scan-syntax-section h3 {
+            color: var(--text);
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .scan-syntax-section h4 {
+            color: var(--primary);
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .scan-command-group {
+            background: rgba(77, 101, 255, 0.05);
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .scan-command-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .code-block {
+            background: #0a0714;
+            color: var(--text);
+            padding: 16px;
+            border-radius: 6px;
+            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-x: auto;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid var(--border);
+            white-space: pre;
+        }
+
+        .code-block:hover {
+            background: rgba(77, 101, 255, 0.1);
+            border-color: var(--primary);
+        }
+
+        .code-block::after {
+            content: '📋 Click to copy';
+            position: absolute;
+            right: 12px;
+            top: 12px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
         .footer {
             background: var(--card-bg);
             padding: 24px;
@@ -631,6 +696,58 @@
                 <li><a href="https://www.cidersecurity.io/top-10-ci-cd-security-risks/" target="_blank">Top 10 CI/CD Security Risks</a></li>
                 <li><a href="https://github.com/hahwul/DevSecOps" target="_blank">DevSecOps Resources Collection</a></li>
             </ul>
+        </div>
+
+        <div class="scan-syntax-section">
+            <h3>🔍 Quick Scan Commands</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 16px;">Use these commands to quickly enumerate DevOps attack surface on your targets.</p>
+
+            <div class="scan-command-group">
+                <h4>HTTPX - Service Discovery</h4>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 8px;">Probe for common DevOps services by port and path:</p>
+                <div class="code-block" onclick="copyCode(this)">
+# Discover DevOps services on common ports
+cat targets.txt | httpx -p 80,443,8080,8443,9000,8000,8888,3000,5000,8081,8082,9090,9443,6443 -title -tech-detect -status-code
+
+# Check for specific DevOps paths
+cat targets.txt | httpx -path "/jenkins/,/gitlab/,/artifactory/,/nexus/,/sonarqube/,/grafana/,/prometheus/,/kibana/,/argocd/,/.git/config" -mc 200,301,302,401,403
+
+# Full DevOps path enumeration
+echo "target.com" | httpx -path "/api/v4/projects,/api/v1/namespaces,/v2/_catalog,/job/,/blue/organizations/,/userContent/,/.well-known/," -mc 200,401,403</div>
+            </div>
+
+            <div class="scan-command-group">
+                <h4>Nuclei - Vulnerability Scanning</h4>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 8px;">Scan for DevOps-specific vulnerabilities and misconfigurations:</p>
+                <div class="code-block" onclick="copyCode(this)">
+# Scan with DevOps-focused templates
+nuclei -l targets.txt -tags devops,cicd,jenkins,gitlab,kubernetes,docker,aws,azure,gcp -severity medium,high,critical
+
+# Target specific technologies
+nuclei -l targets.txt -tags jenkins -severity low,medium,high,critical
+nuclei -l targets.txt -tags gitlab -severity low,medium,high,critical
+nuclei -l targets.txt -tags kubernetes -severity low,medium,high,critical
+
+# Default credentials checks
+nuclei -l targets.txt -tags default-login -severity low,medium,high,critical
+
+# Exposed panels and dashboards
+nuclei -l targets.txt -tags panel,dashboard,exposed -severity info,low,medium,high</div>
+            </div>
+
+            <div class="scan-command-group">
+                <h4>Combined Recon Pipeline</h4>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 8px;">Full enumeration workflow:</p>
+                <div class="code-block" onclick="copyCode(this)">
+# Complete DevOps attack surface enumeration
+subfinder -d target.com -silent | dnsx -silent | httpx -p 80,443,8080,8443,9000,3000,5000,8081,9090,6443 -title -tech-detect -o live_hosts.txt
+
+# Scan discovered hosts for vulnerabilities
+nuclei -l live_hosts.txt -tags devops,cicd,exposed,default-login,misconfig -severity medium,high,critical -o vulns.txt
+
+# Check for exposed .git directories
+cat live_hosts.txt | httpx -path "/.git/config,/.git/HEAD" -mc 200 -o exposed_git.txt</div>
+            </div>
         </div>
     </div>
 
@@ -947,6 +1064,33 @@
                             "Repository enumeration",
                             "Zero-click CI/CD vulnerabilities"
                         ]
+                    },
+                    {
+                        name: "Perforce Helix Core",
+                        description: "Enterprise version control for large-scale development. Default port 1666. Common in gaming and large enterprises.",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-45849' target='_blank'>CVE-2023-45849</a> (CVSS 10.0) - Unauthenticated RCE as LocalSystem/root (CRITICAL)",
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-5759' target='_blank'>CVE-2023-5759</a> (CVSS 7.5) - DoS via malformed RPC packets",
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-7536' target='_blank'>CVE-2024-7536</a> - Server crash via RPC header abuse",
+                            "Empty protection table = all users have superuser privileges (until first p4 protect)",
+                            "First user created automatically gets superuser access",
+                            "Passwordless accounts allow impersonation (p4 -u targetuser)",
+                            "Plaintext connections on port 1666 - MITM credential theft",
+                            "p4 info - Server version, root path, license info disclosure",
+                            "p4 users - Enumerate all user accounts",
+                            "p4 groups - List all groups and memberships",
+                            "p4 protects - Test current user's permission levels",
+                            "p4 depots - List all available depots",
+                            "p4 files //depot/... - Recursive file enumeration",
+                            "p4 print //depot/path - Read file contents without sync",
+                            "p4 changes -l //... - Commit history with full descriptions",
+                            "p4 grep -e 'password' //... - Search depot for secrets",
+                            "Ticket-based auth - steal .p4tickets file for session hijacking",
+                            "P4CONFIG files may contain credentials (.p4config, .p4enviro)",
+                            "Jenkins P4 Plugin credential exposure",
+                            "Service accounts: svc_perforce, p4admin, perforce, p4service"
+                        ],
+                        defaultCreds: "No hardcoded defaults, but first user = superuser. Check for passwordless accounts."
                     }
                 ]
             },
@@ -1691,6 +1835,13 @@
 
         function toggleTool(element) {
             element.classList.toggle('expanded');
+        }
+
+        function copyCode(element) {
+            const text = element.textContent.replace('📋 Click to copy', '').trim();
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Commands copied to clipboard!');
+            });
         }
 
         function expandAllCategories() {
