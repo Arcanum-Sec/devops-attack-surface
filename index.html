@@ -590,65 +590,9 @@
             }
         }
 
-        /* Tab Navigation */
-        .tab-nav {
-            background: #0a0714;
-            border-bottom: 1px solid var(--border);
-            padding: 0;
-            position: sticky;
-            top: 0;
-            z-index: 101;
-        }
-
-        .tab-nav-inner {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-            display: flex;
-            gap: 0;
-        }
-
-        .tab-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 16px 24px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .tab-link:hover {
-            color: var(--text);
-            background: rgba(77, 101, 255, 0.1);
-        }
-
-        .tab-link.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-            background: rgba(77, 101, 255, 0.05);
-        }
-
-        .tab-icon {
-            font-size: 16px;
-        }
     </style>
 </head>
 <body>
-    <nav class="tab-nav">
-        <div class="tab-nav-inner">
-            <a href="index.html" class="tab-link active">
-                <span class="tab-icon">🎯</span> Attack Surface
-            </a>
-            <a href="default-credentials.html" class="tab-link">
-                <span class="tab-icon">🔑</span> Default Credentials
-            </a>
-        </div>
-    </nav>
-
     <div class="header">
         <div class="header-content">
             <h1> DevOps Pipeline Attack Surface</h1>
@@ -749,7 +693,7 @@ nmap -sL -n 10.0.0.0/24 | awk '/Nmap scan report/{print $NF}' > targets.txt</div
                 <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 8px;">Probe internal IPs for DevOps services on common ports:</p>
                 <div class="code-block" onclick="copyCode(this)">
 # Discover DevOps services on common ports (from IP list)
-cat targets.txt | httpx -p 80,443,8080,8443,9000,8000,8888,3000,5000,8081,8082,9090,9443,6443,1666,7990,8929,9001 -title -tech-detect -status-code -o live_devops.txt
+cat targets.txt | httpx -p 80,443,8080,8443,9000,8000,8888,3000,5000,8081,8082,9090,9443,6443,1666,7990,8929,9001,5432,3306,27017,6379,1433,9200,5601,15672,8161,7001 -title -tech-detect -status-code -o live_devops.txt
 
 # Scan specific CIDR directly
 echo "10.0.0.0/24" | mapcidr -silent | httpx -p 80,443,8080,8443,9000,3000,8081,9090,6443 -title -tech-detect -o live_hosts.txt
@@ -769,7 +713,7 @@ cat targets.txt | httpx -p 1666 -title -status-code -o perforce_servers.txt</div
                 <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 8px;">Scan discovered hosts for DevOps vulnerabilities:</p>
                 <div class="code-block" onclick="copyCode(this)">
 # Full DevOps vulnerability scan
-nuclei -l live_devops.txt -tags devops,cicd,jenkins,gitlab,kubernetes,docker,grafana,prometheus -severity medium,high,critical -o vulns_devops.txt
+nuclei -l live_devops.txt -tags devops,cicd,jenkins,gitlab,kubernetes,docker,grafana,prometheus,mysql,postgres,mongodb,redis,mssql,wordpress,drupal,joomla,tomcat,weblogic -severity medium,high,critical -o vulns_devops.txt
 
 # Default credentials (critical for internal pentest)
 nuclei -l live_devops.txt -tags default-login -severity info,low,medium,high,critical -o default_creds.txt
@@ -802,13 +746,13 @@ for range in "10.0.0.0/24" "192.168.1.0/24" "172.16.0.0/24"; do
 done
 
 # 2. Fast port scan for DevOps services
-cat all_targets.txt | httpx -p 80,443,8080,8443,9000,3000,5000,8081,9090,6443,8929,7990,1666,9001,3000,5601,9200 -title -tech-detect -status-code -threads 100 -o live_services.txt
+cat all_targets.txt | httpx -p 80,443,8080,8443,9000,3000,5000,8081,9090,6443,8929,7990,1666,9001,5601,9200,5432,3306,27017,6379,1433,15672,8161,7001,5984,9042 -title -tech-detect -status-code -threads 100 -o live_services.txt
 
 # 3. Extract just URLs for nuclei
 cat live_services.txt | cut -d' ' -f1 > live_urls.txt
 
 # 4. Run comprehensive nuclei scan
-nuclei -l live_urls.txt -tags devops,cicd,default-login,exposed,panel,jenkins,gitlab,kubernetes,docker -severity info,low,medium,high,critical -o all_findings.txt
+nuclei -l live_urls.txt -tags devops,cicd,default-login,exposed,panel,jenkins,gitlab,kubernetes,docker,mysql,postgres,mongodb,redis,wordpress,drupal,tomcat,weblogic,activemq,rabbitmq -severity info,low,medium,high,critical -o all_findings.txt
 
 # 5. Check for exposed .git directories
 cat live_urls.txt | httpx -path "/.git/config,/.git/HEAD,/.svn/entries" -mc 200 -o exposed_repos.txt
@@ -1863,6 +1807,451 @@ cat live_urls.txt | gowitness file -f - -P screenshots/</div>
                             "Detected secret enumeration (if compromised)",
                             "Webhook manipulation"
                         ]
+                    }
+                ]
+            },
+            {
+                category: "Databases",
+                icon: "",
+                description: "Database systems are critical infrastructure. Misconfigurations and default credentials lead to data breaches and lateral movement.",
+                tools: [
+                    {
+                        name: "PostgreSQL",
+                        description: "Advanced open-source relational database. Commonly used in enterprise and DevOps environments.",
+                        defaultPort: "5432",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-7348' target='_blank'>CVE-2024-7348</a> (CVSS 7.5) - SQL injection in pg_dump",
+                            "Default 'trust' authentication in pg_hba.conf",
+                            "Unauthenticated access if misconfigured",
+                            "COPY TO/FROM for file read/write",
+                            "Command execution via extensions (pg_execute_server_program)",
+                            "Password cracking via pg_authid table",
+                            "Large object abuse for file operations"
+                        ],
+                        defaultCreds: "postgres:postgres, postgres:(empty)"
+                    },
+                    {
+                        name: "MySQL / MariaDB",
+                        description: "Most popular open-source relational database. Common target in web application attacks.",
+                        defaultPort: "3306",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-21096' target='_blank'>CVE-2024-21096</a> - Unauthenticated RCE via mysqldump",
+                            "Empty root password on fresh installs",
+                            "User Defined Functions (UDF) for command execution",
+                            "INTO OUTFILE for web shell upload",
+                            "LOAD DATA LOCAL INFILE for file read",
+                            "SELECT ... INTO DUMPFILE for binary writes",
+                            "Authentication bypass via CVE-2012-2122"
+                        ],
+                        defaultCreds: "root:(empty), root:root, root:mysql"
+                    },
+                    {
+                        name: "MongoDB",
+                        description: "NoSQL document database. Historically exposed without authentication.",
+                        defaultPort: "27017, 27018, 28017",
+                        attackVectors: [
+                            "Default no authentication (pre-3.0 and misconfigured)",
+                            "MongoDB Compass/Shell unauthenticated access",
+                            "$where JavaScript injection",
+                            "SSRF via $lookup aggregation",
+                            "Server Side JavaScript (SSJS) injection",
+                            "Ransomware targeting exposed instances",
+                            "Data exfiltration via mongoexport"
+                        ],
+                        defaultCreds: "admin:(empty), (no auth by default)"
+                    },
+                    {
+                        name: "Redis",
+                        description: "In-memory data store. Commonly exposed without authentication.",
+                        defaultPort: "6379",
+                        attackVectors: [
+                            "No authentication by default",
+                            "CONFIG SET dir/dbfilename for file write (RCE)",
+                            "SSH key injection via authorized_keys",
+                            "Crontab injection for reverse shell",
+                            "Web shell upload to webroot",
+                            "Module loading for arbitrary code execution",
+                            "Lua scripting abuse via EVAL",
+                            "Master-slave replication attacks"
+                        ],
+                        defaultCreds: "(no auth), requirepass: (empty)"
+                    },
+                    {
+                        name: "Microsoft SQL Server",
+                        description: "Enterprise relational database. High-value target with xp_cmdshell for RCE.",
+                        defaultPort: "1433, 1434 (UDP)",
+                        attackVectors: [
+                            "xp_cmdshell for command execution",
+                            "OPENROWSET for file operations",
+                            "Linked servers for lateral movement",
+                            "SQL Agent jobs for persistence",
+                            "CLR Assembly injection for arbitrary code",
+                            "OLE Automation for command execution",
+                            "Steal NTLM hashes via xp_dirtree to UNC"
+                        ],
+                        defaultCreds: "sa:(empty), sa:sa, sa:Password1"
+                    },
+                    {
+                        name: "Oracle Database",
+                        description: "Enterprise database with complex privilege system. Legacy defaults still found.",
+                        defaultPort: "1521, 1522-1540",
+                        attackVectors: [
+                            "TNS Listener poisoning",
+                            "SYS/SYSTEM default credentials",
+                            "Java stored procedure RCE",
+                            "DBMS_SCHEDULER for command execution",
+                            "UTL_HTTP/UTL_FILE for SSRF/file access",
+                            "External tables for file read",
+                            "Database link abuse for lateral movement"
+                        ],
+                        defaultCreds: "sys:change_on_install, system:manager, scott:tiger, dbsnmp:dbsnmp"
+                    },
+                    {
+                        name: "Elasticsearch",
+                        description: "Search and analytics engine. Part of ELK stack. Often exposed without auth.",
+                        defaultPort: "9200, 9300",
+                        attackVectors: [
+                            "No authentication by default (pre-7.x)",
+                            "Script execution via _search queries",
+                            "Snapshot repository path traversal",
+                            "Index manipulation and data theft",
+                            "_cat/indices for data enumeration",
+                            "Cross-cluster search abuse",
+                            "Watcher for command execution (X-Pack)"
+                        ],
+                        defaultCreds: "elastic:changeme (X-Pack)"
+                    },
+                    {
+                        name: "Cassandra",
+                        description: "Distributed NoSQL database. Used for high-availability systems.",
+                        defaultPort: "9042, 7000, 7001, 7199",
+                        attackVectors: [
+                            "Default credentials on initial setup",
+                            "CQL injection attacks",
+                            "JMX interface exploitation (port 7199)",
+                            "Unauthenticated access if not configured",
+                            "Nodetool commands for cluster manipulation"
+                        ],
+                        defaultCreds: "cassandra:cassandra"
+                    },
+                    {
+                        name: "CouchDB",
+                        description: "NoSQL document database with HTTP API. Admin party mode is dangerous.",
+                        defaultPort: "5984, 6984 (SSL)",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2022-24706' target='_blank'>CVE-2022-24706</a> - Remote privilege escalation",
+                            "Admin Party mode (no authentication)",
+                            "_users database manipulation",
+                            "Design document injection for RCE",
+                            "Replication for data exfiltration"
+                        ],
+                        defaultCreds: "admin:(empty), (admin party mode)"
+                    }
+                ]
+            },
+            {
+                category: "CMS & Web Platforms",
+                icon: "",
+                description: "Content Management Systems power most websites. Rich attack surface with plugins, themes, and admin panels.",
+                tools: [
+                    {
+                        name: "WordPress",
+                        description: "Most popular CMS (~40% of web). Massive plugin ecosystem with frequent vulnerabilities.",
+                        defaultPort: "80, 443",
+                        attackVectors: [
+                            "wp-admin default login enumeration (/wp-login.php)",
+                            "XML-RPC brute force and DDoS amplification",
+                            "Plugin vulnerabilities (check WPScan DB)",
+                            "Theme editor for backdoor upload",
+                            "/wp-json/wp/v2/users for user enumeration",
+                            "wp-config.php exposure for credentials",
+                            "Backup files (.sql, .zip) in webroot"
+                        ],
+                        defaultCreds: "admin:admin, admin:password"
+                    },
+                    {
+                        name: "Drupal",
+                        description: "Enterprise CMS used by governments and large organizations.",
+                        defaultPort: "80, 443",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2018-7600' target='_blank'>CVE-2018-7600</a> (Drupalgeddon 2) - RCE",
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2019-6340' target='_blank'>CVE-2019-6340</a> - REST RCE",
+                            "Module vulnerabilities",
+                            "settings.php credential exposure",
+                            "User enumeration via registration",
+                            "Views SQL injection in older modules"
+                        ],
+                        defaultCreds: "admin:admin (after install)"
+                    },
+                    {
+                        name: "Joomla",
+                        description: "Popular CMS with admin panel attacks and extension vulnerabilities.",
+                        defaultPort: "80, 443",
+                        attackVectors: [
+                            "Administrator panel brute force (/administrator)",
+                            "Extension vulnerabilities",
+                            "Configuration.php exposure",
+                            "SQL injection in older versions",
+                            "User enumeration via API",
+                            "Template injection for RCE"
+                        ],
+                        defaultCreds: "admin:admin"
+                    },
+                    {
+                        name: "Magento",
+                        description: "E-commerce platform. Payment data and admin access are high-value targets.",
+                        defaultPort: "80, 443",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-34102' target='_blank'>CVE-2024-34102</a> (CosmicSting) - XXE to RCE",
+                            "Shoplift vulnerability (CVE-2015-1397)",
+                            "Admin panel brute force (/admin)",
+                            "Payment data skimming via JS injection",
+                            "Customer data exfiltration",
+                            "local.xml credential exposure"
+                        ],
+                        defaultCreds: "admin:admin123, admin:password123"
+                    },
+                    {
+                        name: "Apache Tomcat",
+                        description: "Java servlet container. Manager app is a prime target for RCE.",
+                        defaultPort: "8080, 8443, 8009 (AJP)",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2020-1938' target='_blank'>CVE-2020-1938</a> (Ghostcat) - AJP file read/RCE",
+                            "Manager app WAR deployment for RCE",
+                            "Default credentials on manager app",
+                            "Host manager for virtual host manipulation",
+                            "JSP shell upload via manager",
+                            "tomcat-users.xml credential extraction"
+                        ],
+                        defaultCreds: "admin:admin, tomcat:tomcat, tomcat:s3cret, manager:manager"
+                    },
+                    {
+                        name: "JBoss / WildFly",
+                        description: "Java EE application server. Management interfaces expose RCE vectors.",
+                        defaultPort: "8080, 9990, 4447",
+                        attackVectors: [
+                            "JMX Console for bean manipulation",
+                            "Admin console default credentials",
+                            "WAR file deployment via console",
+                            "JBoss Seam framework deserialization",
+                            "HTTP invoker for remote code execution",
+                            "JMXInvokerServlet exploitation"
+                        ],
+                        defaultCreds: "admin:admin, admin:jboss"
+                    },
+                    {
+                        name: "WebLogic",
+                        description: "Oracle application server. History of critical deserialization vulnerabilities.",
+                        defaultPort: "7001, 7002, 9001, 9002",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-21839' target='_blank'>CVE-2023-21839</a> - Unauthenticated RCE",
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2020-14882' target='_blank'>CVE-2020-14882</a> - Console RCE bypass",
+                            "T3 protocol deserialization attacks",
+                            "IIOP deserialization vulnerabilities",
+                            "Console deployment for RCE",
+                            "SSRF via UDDI"
+                        ],
+                        defaultCreds: "weblogic:weblogic, weblogic:welcome1"
+                    },
+                    {
+                        name: "phpMyAdmin",
+                        description: "MySQL web administration. Exposed instances grant database control.",
+                        defaultPort: "80, 443",
+                        attackVectors: [
+                            "Default credentials for database access",
+                            "SQL file import for command execution",
+                            "PHP code injection via server SQL",
+                            "LFI vulnerabilities in older versions",
+                            "setup.php misconfiguration exploitation"
+                        ],
+                        defaultCreds: "root:(empty), root:root, admin:admin"
+                    }
+                ]
+            },
+            {
+                category: "Network Infrastructure",
+                icon: "",
+                description: "Network devices control traffic flow. Compromise grants lateral movement and traffic interception.",
+                tools: [
+                    {
+                        name: "Cisco IOS",
+                        description: "Network operating system for Cisco routers and switches.",
+                        defaultPort: "22, 23, 80, 443",
+                        attackVectors: [
+                            "SNMP community string enumeration",
+                            "Telnet/SSH brute force",
+                            "Smart Install protocol RCE (CVE-2018-0171)",
+                            "HTTP/HTTPS interface default credentials",
+                            "Config file extraction via TFTP/SNMP",
+                            "Enable password cracking",
+                            "Privilege escalation via IOS vulnerabilities"
+                        ],
+                        defaultCreds: "admin:admin, cisco:cisco, enable:(empty)"
+                    },
+                    {
+                        name: "Juniper",
+                        description: "Enterprise network equipment. Junos OS and ScreenOS devices.",
+                        defaultPort: "22, 23, 80, 443",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-36845' target='_blank'>CVE-2023-36845</a> - PHP environment injection RCE",
+                            "ScreenOS backdoor (CVE-2015-7755)",
+                            "SNMP enumeration",
+                            "J-Web interface vulnerabilities",
+                            "Config extraction via NETCONF"
+                        ],
+                        defaultCreds: "root:(empty), admin:abc123"
+                    },
+                    {
+                        name: "Fortinet FortiGate",
+                        description: "Next-gen firewall. SSL VPN and admin interface are prime targets.",
+                        defaultPort: "22, 443, 541, 10443",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-21762' target='_blank'>CVE-2024-21762</a> - SSL VPN RCE (CRITICAL)",
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2022-40684' target='_blank'>CVE-2022-40684</a> - Auth bypass via HTTP headers",
+                            "SSL VPN credential harvesting",
+                            "FortiOS CVE chain exploitation",
+                            "REST API abuse",
+                            "FortiManager access"
+                        ],
+                        defaultCreds: "admin:(empty), admin:admin"
+                    },
+                    {
+                        name: "Palo Alto Networks",
+                        description: "Enterprise firewall. GlobalProtect VPN and management interface.",
+                        defaultPort: "443, 4443",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-3400' target='_blank'>CVE-2024-3400</a> (CVSS 10.0) - GlobalProtect RCE",
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2024-0012' target='_blank'>CVE-2024-0012</a> - Auth bypass",
+                            "Management interface brute force",
+                            "API key extraction",
+                            "GlobalProtect portal enumeration"
+                        ],
+                        defaultCreds: "admin:admin"
+                    },
+                    {
+                        name: "Dell iDRAC",
+                        description: "Remote server management. Out-of-band access to physical servers.",
+                        defaultPort: "443, 5900, 623 (IPMI)",
+                        attackVectors: [
+                            "IPMI cipher zero authentication bypass",
+                            "Default credentials on new systems",
+                            "RACADM command execution",
+                            "Virtual console access",
+                            "IPMI hash extraction",
+                            "Firmware exploitation"
+                        ],
+                        defaultCreds: "root:calvin"
+                    },
+                    {
+                        name: "HP iLO",
+                        description: "HP server remote management. Integrated Lights-Out interface.",
+                        defaultPort: "443, 17988, 17990",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2017-12542' target='_blank'>CVE-2017-12542</a> - Auth bypass via header injection",
+                            "Default administrator credentials",
+                            "RIBCL interface exploitation",
+                            "Virtual media boot attacks",
+                            "SSH/HTTP interface brute force"
+                        ],
+                        defaultCreds: "Administrator:(tag on server)"
+                    },
+                    {
+                        name: "VMware ESXi",
+                        description: "Bare-metal hypervisor. Controls all VMs on the host.",
+                        defaultPort: "443, 902, 22",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2021-21974' target='_blank'>CVE-2021-21974</a> - OpenSLP heap overflow RCE",
+                            "vSphere Web Client default creds",
+                            "DCUI shell access",
+                            "VM escape vulnerabilities",
+                            "vMotion network interception"
+                        ],
+                        defaultCreds: "root:vmware, root:(set during install)"
+                    },
+                    {
+                        name: "VMware vCenter",
+                        description: "VMware management platform. Crown jewel for virtualization environments.",
+                        defaultPort: "443, 5480, 9443",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2021-22005' target='_blank'>CVE-2021-22005</a> - File upload RCE",
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2021-21972' target='_blank'>CVE-2021-21972</a> - Unauthenticated RCE",
+                            "vSphere Client plugin exploitation",
+                            "SAML assertion forgery",
+                            "PostgreSQL database access"
+                        ],
+                        defaultCreds: "administrator@vsphere.local:(set during install)"
+                    },
+                    {
+                        name: "Proxmox VE",
+                        description: "Open-source virtualization platform. Web-based management.",
+                        defaultPort: "8006, 22",
+                        attackVectors: [
+                            "Web UI default credentials",
+                            "API token extraction",
+                            "Cluster compromise",
+                            "Storage backend access",
+                            "VM snapshot manipulation"
+                        ],
+                        defaultCreds: "root:(set during install)"
+                    }
+                ]
+            },
+            {
+                category: "Message Queues & Middleware",
+                icon: "",
+                description: "Message brokers and middleware. Often have management interfaces with default credentials.",
+                tools: [
+                    {
+                        name: "RabbitMQ",
+                        description: "Popular message broker. Management interface exposes full control.",
+                        defaultPort: "5672, 15672 (mgmt), 25672",
+                        attackVectors: [
+                            "Management console default credentials",
+                            "Shovel plugin for data exfiltration",
+                            "Erlang cookie theft for clustering",
+                            "Virtual host enumeration",
+                            "Message interception"
+                        ],
+                        defaultCreds: "guest:guest (localhost only by default)"
+                    },
+                    {
+                        name: "Apache ActiveMQ",
+                        description: "Java message broker. Recent critical CVEs for RCE.",
+                        defaultPort: "61616, 8161 (web), 61613, 61614",
+                        attackVectors: [
+                            "<a href='https://nvd.nist.gov/vuln/detail/CVE-2023-46604' target='_blank'>CVE-2023-46604</a> (CVSS 10.0) - OpenWire deserialization RCE",
+                            "Web console default credentials",
+                            "JMX interface exploitation",
+                            "Scheduler command injection",
+                            "Deserialization in older versions"
+                        ],
+                        defaultCreds: "admin:admin"
+                    },
+                    {
+                        name: "Apache Kafka",
+                        description: "Distributed streaming platform. Often runs without authentication.",
+                        defaultPort: "9092, 9093 (SSL)",
+                        attackVectors: [
+                            "No authentication by default",
+                            "Topic enumeration and data theft",
+                            "Producer injection for poisoned messages",
+                            "Consumer group manipulation",
+                            "ZooKeeper access for cluster control"
+                        ],
+                        defaultCreds: "(no auth by default)"
+                    },
+                    {
+                        name: "ZooKeeper",
+                        description: "Distributed coordination service. Often exposed without auth.",
+                        defaultPort: "2181, 2888, 3888",
+                        attackVectors: [
+                            "No authentication by default",
+                            "Four-letter-word commands (stat, ruok, dump)",
+                            "Configuration data extraction",
+                            "Cluster manipulation",
+                            "Connected services enumeration"
+                        ],
+                        defaultCreds: "(no auth by default)"
                     }
                 ]
             }
